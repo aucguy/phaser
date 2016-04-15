@@ -9,9 +9,8 @@ module.exports = {
             banner: '/* Phaser v<%= package.version %> - http://phaser.io - @photonstorm - (c) 2015 Photon Storm Ltd. */\n'
         },
 
-        src: ['<%= concat.custom.dest %>'],
+        src: '<%= compile_dir %>/<%= filename %>.js',
         dest: '<%= compile_dir %>/<%= filename %>.min.js'
-
     },
 
     pixi: {

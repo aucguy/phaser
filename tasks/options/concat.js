@@ -34,7 +34,7 @@ module.exports = {
         src: require('../manifests/pixi-main'),
         dest: '<%= modules_dir %>/pixi-main.js'
     },
-    
+
     pixiRope: {
         src: require('../manifests/pixi-rope'),
         dest: '<%= modules_dir %>/pixi-rope.js'
@@ -304,7 +304,7 @@ module.exports = {
         src: require('../manifests/pixidefs'),
         dest: '<%= modules_dir %>/pixidefs.js'
     },
-    
+
     outro: {
         src: require('../manifests/outro'),
         dest: '<%= modules_dir %>/outro.js'
@@ -319,7 +319,7 @@ module.exports = {
             banner: '<%= banner %>',
         },
         src: ['<%= filelist %>'],
-        dest: '<%= compile_dir %>/<%= filename %>.js'
+        dest: '<%= compile_dir %>/<%= filename %>Unrepl.js'
     },
 
     pixi: {

@@ -4,8 +4,8 @@ module.exports = {
         expand: true,
         flatten: true,
         cwd: '<%= compile_dir %>/',
-        src: ['*.js', '*.map'],
+        src: ['*.js', '*.map', '!*Unrepl.js'],
         dest: '<%= target_dir %>/'
     }
-   
+
 };

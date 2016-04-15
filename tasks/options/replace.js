@@ -18,6 +18,18 @@ module.exports = {
         }]
     },
 
+    custom: {
+      src: '<%= compile_dir %>/<%= filename %>Unrepl.js',
+      dest: '<%= compile_dir %>/<%= filename %>.js',
+      replacements: [{
+        from: /([\w.]*)[.]addEventListener\(/g,
+        to: 'base.addEventListener($1, '
+      }, {
+        from: /([\w.]*)[.]removeEventListener\(/g,
+        to: 'base.removeEventListener($1, '
+      }]
+    },
+
     docs: {
         src: ['docs/index.html'],
         dest: 'docs/index.html',
