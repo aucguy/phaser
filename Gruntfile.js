@@ -219,7 +219,7 @@ module.exports = function (grunt) {
                 //  3) PIXI
 
                 grunt.log.writeln("-> PIXI");
-                
+
                 if (!excludedKeys['intro'])
                 {
                     tasks.push('concat:pixiIntro');
@@ -228,7 +228,7 @@ module.exports = function (grunt) {
 
                 tasks.push('concat:pixiMain');
                 pixiFilelist.push('<%= modules_dir %>/pixi-main.js');
-                
+
                 //  Optional Rope
                 if (!excludedKeys['rope'])
                 {
@@ -292,7 +292,7 @@ module.exports = function (grunt) {
                 //  3) PIXI
 
                 grunt.log.writeln("-> PIXI");
-                
+
                 if (!excludedKeys['intro'])
                 {
                     tasks.push('concat:pixiIntro');
@@ -301,7 +301,7 @@ module.exports = function (grunt) {
 
                 tasks.push('concat:pixiMain');
                 filelist.push('<%= modules_dir %>/pixi-main.js');
-                
+
                 //  Optional Rope
                 if (!excludedKeys['rope'])
                 {
@@ -371,6 +371,7 @@ module.exports = function (grunt) {
             grunt.config.set('filelist', filelist);
 
             tasks.push('concat:custom');
+            tasks.push('replace:custom');
 
             if (grunt.option('uglify'))
             {
