@@ -7,7 +7,7 @@
 *
 * Phaser - http://phaser.io
 *
-* v2.4.6 "Baerlon" - Built: Thu Feb 18 2016 14:39:48
+* v2.4.6 "Baerlon" - Built: Tue Aug 09 2016 22:32:54
 *
 * By Richard Davey http://www.photonstorm.com @photonstorm
 *
@@ -22711,9 +22711,11 @@ Object.defineProperty(PIXI.TilingSprite.prototype, 'height', {
 * @author       Richard Davey <rich@photonstorm.com>
 * @copyright    2015 Photon Storm Ltd.
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+* basejs enabled
 */
 
-(function(){
+base.external(function(){
+    var window = base.customWindow();
 
     var root = this;
 
@@ -31023,7 +31025,7 @@ Phaser.Stage.prototype.checkVisibility = function () {
     //  Does browser support it? If not (like in IE9 or old Android) we need to fall back to blur/focus
     if (this._hiddenVar)
     {
-        document.addEventListener(this._hiddenVar, this._onChange, false);
+        base.addEventListener(document, this._hiddenVar, this._onChange, false);
     }
 
     window.onblur = this._onChange;
@@ -31034,11 +31036,11 @@ Phaser.Stage.prototype.checkVisibility = function () {
     
     if (this.game.device.cocoonJSApp)
     {
-        CocoonJS.App.onSuspended.addEventListener(function () {
+        base.addEventListener(CocoonJS.App.onSuspended, function () {
             Phaser.Stage.prototype.visibilityChange.call(_this, { type: "pause" });
         });
 
-        CocoonJS.App.onActivated.addEventListener(function () {
+        base.addEventListener(CocoonJS.App.onActivated, function () {
             Phaser.Stage.prototype.visibilityChange.call(_this, { type: "resume" });
         });
     }
@@ -31119,7 +31121,7 @@ Phaser.Stage.prototype.destroy  = function () {
 
     if (this._hiddenVar)
     {
-        document.removeEventListener(this._hiddenVar, this._onChange, false);
+        base.removeEventListener(document, this._hiddenVar, this._onChange, false);
     }
 
     window.onpagehide = null;
@@ -34580,8 +34582,8 @@ Phaser.Game.prototype = {
 
             this.context = null;
 
-            this.canvas.addEventListener('webglcontextlost', this.contextLost.bind(this), false);
-            this.canvas.addEventListener('webglcontextrestored', this.contextRestored.bind(this), false);
+            base.addEventListener(this.canvas, 'webglcontextlost', this.contextLost.bind(this), false);
+            base.addEventListener(this.canvas, 'webglcontextrestored', this.contextRestored.bind(this), false);
         }
 
         if (this.device.cocoonJS)
@@ -35459,7 +35461,7 @@ Phaser.Input.prototype = {
             _this.onClickTrampoline(event);
         };
 
-        this.game.canvas.addEventListener('click', this._onClickTrampoline, false);
+        base.addEventListener(this.game.canvas, 'click', this._onClickTrampoline, false);
 
     },
 
@@ -35488,7 +35490,7 @@ Phaser.Input.prototype = {
 
         PIXI.CanvasPool.remove(this);
 
-        this.game.canvas.removeEventListener('click', this._onClickTrampoline);
+        base.removeEventListener(this.game.canvas, 'click', this._onClickTrampoline);
 
     },
 
@@ -36385,23 +36387,23 @@ Phaser.Mouse.prototype = {
 
         var canvas = this.game.canvas;
 
-        canvas.addEventListener('mousedown', this._onMouseDown, true);
-        canvas.addEventListener('mousemove', this._onMouseMove, true);
-        canvas.addEventListener('mouseup', this._onMouseUp, true);
+        base.addEventListener(canvas, 'mousedown', this._onMouseDown, true);
+        base.addEventListener(canvas, 'mousemove', this._onMouseMove, true);
+        base.addEventListener(canvas, 'mouseup', this._onMouseUp, true);
 
         if (!this.game.device.cocoonJS)
         {
-            window.addEventListener('mouseup', this._onMouseUpGlobal, true);
-            window.addEventListener('mouseout', this._onMouseOutGlobal, true);
-            canvas.addEventListener('mouseover', this._onMouseOver, true);
-            canvas.addEventListener('mouseout', this._onMouseOut, true);
+            base.addEventListener(window, 'mouseup', this._onMouseUpGlobal, true);
+            base.addEventListener(window, 'mouseout', this._onMouseOutGlobal, true);
+            base.addEventListener(canvas, 'mouseover', this._onMouseOver, true);
+            base.addEventListener(canvas, 'mouseout', this._onMouseOut, true);
         }
 
         var wheelEvent = this.game.device.wheelEvent;
 
         if (wheelEvent)
         {
-            canvas.addEventListener(wheelEvent, this._onMouseWheel, true);
+            base.addEventListener(canvas, wheelEvent, this._onMouseWheel, true);
 
             if (wheelEvent === 'mousewheel')
             {
@@ -36674,9 +36676,9 @@ Phaser.Mouse.prototype = {
                 return _this.pointerLockChange(event);
             };
 
-            document.addEventListener('pointerlockchange', this._pointerLockChange, true);
-            document.addEventListener('mozpointerlockchange', this._pointerLockChange, true);
-            document.addEventListener('webkitpointerlockchange', this._pointerLockChange, true);
+            base.addEventListener(document, 'pointerlockchange', this._pointerLockChange, true);
+            base.addEventListener(document, 'mozpointerlockchange', this._pointerLockChange, true);
+            base.addEventListener(document, 'webkitpointerlockchange', this._pointerLockChange, true);
         }
 
     },
@@ -36716,9 +36718,9 @@ Phaser.Mouse.prototype = {
 
         document.exitPointerLock();
 
-        document.removeEventListener('pointerlockchange', this._pointerLockChange, true);
-        document.removeEventListener('mozpointerlockchange', this._pointerLockChange, true);
-        document.removeEventListener('webkitpointerlockchange', this._pointerLockChange, true);
+        base.removeEventListener(document, 'pointerlockchange', this._pointerLockChange, true);
+        base.removeEventListener(document, 'mozpointerlockchange', this._pointerLockChange, true);
+        base.removeEventListener(document, 'webkitpointerlockchange', this._pointerLockChange, true);
 
     },
 
@@ -36730,24 +36732,24 @@ Phaser.Mouse.prototype = {
 
         var canvas = this.game.canvas;
 
-        canvas.removeEventListener('mousedown', this._onMouseDown, true);
-        canvas.removeEventListener('mousemove', this._onMouseMove, true);
-        canvas.removeEventListener('mouseup', this._onMouseUp, true);
-        canvas.removeEventListener('mouseover', this._onMouseOver, true);
-        canvas.removeEventListener('mouseout', this._onMouseOut, true);
+        base.removeEventListener(canvas, 'mousedown', this._onMouseDown, true);
+        base.removeEventListener(canvas, 'mousemove', this._onMouseMove, true);
+        base.removeEventListener(canvas, 'mouseup', this._onMouseUp, true);
+        base.removeEventListener(canvas, 'mouseover', this._onMouseOver, true);
+        base.removeEventListener(canvas, 'mouseout', this._onMouseOut, true);
 
         var wheelEvent = this.game.device.wheelEvent;
 
         if (wheelEvent)
         {
-            canvas.removeEventListener(wheelEvent, this._onMouseWheel, true);
+            base.removeEventListener(canvas, wheelEvent, this._onMouseWheel, true);
         }
 
-        window.removeEventListener('mouseup', this._onMouseUpGlobal, true);
+        base.removeEventListener(window, 'mouseup', this._onMouseUpGlobal, true);
 
-        document.removeEventListener('pointerlockchange', this._pointerLockChange, true);
-        document.removeEventListener('mozpointerlockchange', this._pointerLockChange, true);
-        document.removeEventListener('webkitpointerlockchange', this._pointerLockChange, true);
+        base.removeEventListener(document, 'pointerlockchange', this._pointerLockChange, true);
+        base.removeEventListener(document, 'mozpointerlockchange', this._pointerLockChange, true);
+        base.removeEventListener(document, 'webkitpointerlockchange', this._pointerLockChange, true);
 
     }
 
@@ -37004,28 +37006,28 @@ Phaser.MSPointer.prototype = {
 
             var canvas = this.game.canvas;
 
-            canvas.addEventListener('MSPointerDown', this._onMSPointerDown, false);
-            canvas.addEventListener('MSPointerMove', this._onMSPointerMove, false);
-            canvas.addEventListener('MSPointerUp', this._onMSPointerUp, false);
+            base.addEventListener(canvas, 'MSPointerDown', this._onMSPointerDown, false);
+            base.addEventListener(canvas, 'MSPointerMove', this._onMSPointerMove, false);
+            base.addEventListener(canvas, 'MSPointerUp', this._onMSPointerUp, false);
 
             //  IE11+ uses non-prefix events
-            canvas.addEventListener('pointerdown', this._onMSPointerDown, false);
-            canvas.addEventListener('pointermove', this._onMSPointerMove, false);
-            canvas.addEventListener('pointerup', this._onMSPointerUp, false);
+            base.addEventListener(canvas, 'pointerdown', this._onMSPointerDown, false);
+            base.addEventListener(canvas, 'pointermove', this._onMSPointerMove, false);
+            base.addEventListener(canvas, 'pointerup', this._onMSPointerUp, false);
 
             canvas.style['-ms-content-zooming'] = 'none';
             canvas.style['-ms-touch-action'] = 'none';
 
             if (!this.game.device.cocoonJS)
             {
-                window.addEventListener('MSPointerUp', this._onMSPointerUpGlobal, true);
-                canvas.addEventListener('MSPointerOver', this._onMSPointerOver, true);
-                canvas.addEventListener('MSPointerOut', this._onMSPointerOut, true);
+                base.addEventListener(window, 'MSPointerUp', this._onMSPointerUpGlobal, true);
+                base.addEventListener(canvas, 'MSPointerOver', this._onMSPointerOver, true);
+                base.addEventListener(canvas, 'MSPointerOut', this._onMSPointerOut, true);
 
                 //  IE11+ uses non-prefix events
-                window.addEventListener('pointerup', this._onMSPointerUpGlobal, true);
-                canvas.addEventListener('pointerover', this._onMSPointerOver, true);
-                canvas.addEventListener('pointerout', this._onMSPointerOut, true);
+                base.addEventListener(window, 'pointerup', this._onMSPointerUpGlobal, true);
+                base.addEventListener(canvas, 'pointerover', this._onMSPointerOver, true);
+                base.addEventListener(canvas, 'pointerout', this._onMSPointerOut, true);
             }
         }
 
@@ -37266,23 +37268,23 @@ Phaser.MSPointer.prototype = {
 
         var canvas = this.game.canvas;
 
-        canvas.removeEventListener('MSPointerDown', this._onMSPointerDown, false);
-        canvas.removeEventListener('MSPointerMove', this._onMSPointerMove, false);
-        canvas.removeEventListener('MSPointerUp', this._onMSPointerUp, false);
+        base.removeEventListener(canvas, 'MSPointerDown', this._onMSPointerDown, false);
+        base.removeEventListener(canvas, 'MSPointerMove', this._onMSPointerMove, false);
+        base.removeEventListener(canvas, 'MSPointerUp', this._onMSPointerUp, false);
 
         //  IE11+ uses non-prefix events
-        canvas.removeEventListener('pointerdown', this._onMSPointerDown, false);
-        canvas.removeEventListener('pointermove', this._onMSPointerMove, false);
-        canvas.removeEventListener('pointerup', this._onMSPointerUp, false);
+        base.removeEventListener(canvas, 'pointerdown', this._onMSPointerDown, false);
+        base.removeEventListener(canvas, 'pointermove', this._onMSPointerMove, false);
+        base.removeEventListener(canvas, 'pointerup', this._onMSPointerUp, false);
 
-        window.removeEventListener('MSPointerUp', this._onMSPointerUpGlobal, true);
-        canvas.removeEventListener('MSPointerOver', this._onMSPointerOver, true);
-        canvas.removeEventListener('MSPointerOut', this._onMSPointerOut, true);
+        base.removeEventListener(window, 'MSPointerUp', this._onMSPointerUpGlobal, true);
+        base.removeEventListener(canvas, 'MSPointerOver', this._onMSPointerOver, true);
+        base.removeEventListener(canvas, 'MSPointerOut', this._onMSPointerOut, true);
 
         //  IE11+ uses non-prefix events
-        window.removeEventListener('pointerup', this._onMSPointerUpGlobal, true);
-        canvas.removeEventListener('pointerover', this._onMSPointerOver, true);
-        canvas.removeEventListener('pointerout', this._onMSPointerOut, true);
+        base.removeEventListener(window, 'pointerup', this._onMSPointerUpGlobal, true);
+        base.removeEventListener(canvas, 'pointerover', this._onMSPointerOver, true);
+        base.removeEventListener(canvas, 'pointerout', this._onMSPointerOut, true);
 
     }
 
@@ -39019,15 +39021,15 @@ Phaser.Touch.prototype = {
                 return _this.onTouchCancel(event);
             };
 
-            this.game.canvas.addEventListener('touchstart', this._onTouchStart, false);
-            this.game.canvas.addEventListener('touchmove', this._onTouchMove, false);
-            this.game.canvas.addEventListener('touchend', this._onTouchEnd, false);
-            this.game.canvas.addEventListener('touchcancel', this._onTouchCancel, false);
+            base.addEventListener(this.game.canvas, 'touchstart', this._onTouchStart, false);
+            base.addEventListener(this.game.canvas, 'touchmove', this._onTouchMove, false);
+            base.addEventListener(this.game.canvas, 'touchend', this._onTouchEnd, false);
+            base.addEventListener(this.game.canvas, 'touchcancel', this._onTouchCancel, false);
 
             if (!this.game.device.cocoonJS)
             {
-                this.game.canvas.addEventListener('touchenter', this._onTouchEnter, false);
-                this.game.canvas.addEventListener('touchleave', this._onTouchLeave, false);
+                base.addEventListener(this.game.canvas, 'touchenter', this._onTouchEnter, false);
+                base.addEventListener(this.game.canvas, 'touchleave', this._onTouchLeave, false);
             }
         }
 
@@ -39043,7 +39045,7 @@ Phaser.Touch.prototype = {
             event.preventDefault();
         };
 
-        document.addEventListener('touchmove', this._documentTouchMove, false);
+        base.addEventListener(document, 'touchmove', this._documentTouchMove, false);
 
     },
 
@@ -39298,12 +39300,12 @@ Phaser.Touch.prototype = {
 
         if (this.game.device.touch)
         {
-            this.game.canvas.removeEventListener('touchstart', this._onTouchStart);
-            this.game.canvas.removeEventListener('touchmove', this._onTouchMove);
-            this.game.canvas.removeEventListener('touchend', this._onTouchEnd);
-            this.game.canvas.removeEventListener('touchenter', this._onTouchEnter);
-            this.game.canvas.removeEventListener('touchleave', this._onTouchLeave);
-            this.game.canvas.removeEventListener('touchcancel', this._onTouchCancel);
+            base.removeEventListener(this.game.canvas, 'touchstart', this._onTouchStart);
+            base.removeEventListener(this.game.canvas, 'touchmove', this._onTouchMove);
+            base.removeEventListener(this.game.canvas, 'touchend', this._onTouchEnd);
+            base.removeEventListener(this.game.canvas, 'touchenter', this._onTouchEnter);
+            base.removeEventListener(this.game.canvas, 'touchleave', this._onTouchLeave);
+            base.removeEventListener(this.game.canvas, 'touchcancel', this._onTouchCancel);
         }
 
     }
@@ -41105,8 +41107,8 @@ Phaser.Gamepad.prototype = {
             return _this.onGamepadDisconnected(event);
         };
 
-        window.addEventListener('gamepadconnected', this._onGamepadConnected, false);
-        window.addEventListener('gamepaddisconnected', this._onGamepadDisconnected, false);
+        base.addEventListener(window, 'gamepadconnected', this._onGamepadConnected, false);
+        base.addEventListener(window, 'gamepaddisconnected', this._onGamepadDisconnected, false);
 
     },
 
@@ -41302,8 +41304,8 @@ Phaser.Gamepad.prototype = {
 
         this._active = false;
 
-        window.removeEventListener('gamepadconnected', this._onGamepadConnected);
-        window.removeEventListener('gamepaddisconnected', this._onGamepadDisconnected);
+        base.removeEventListener(window, 'gamepadconnected', this._onGamepadConnected);
+        base.removeEventListener(window, 'gamepaddisconnected', this._onGamepadDisconnected);
 
     },
 
@@ -42750,9 +42752,9 @@ Phaser.Keyboard.prototype = {
             return _this.processKeyPress(event);
         };
 
-        window.addEventListener('keydown', this._onKeyDown, false);
-        window.addEventListener('keyup', this._onKeyUp, false);
-        window.addEventListener('keypress', this._onKeyPress, false);
+        base.addEventListener(window, 'keydown', this._onKeyDown, false);
+        base.addEventListener(window, 'keyup', this._onKeyUp, false);
+        base.addEventListener(window, 'keypress', this._onKeyPress, false);
 
     },
 
@@ -42763,9 +42765,9 @@ Phaser.Keyboard.prototype = {
     */
     stop: function () {
 
-        window.removeEventListener('keydown', this._onKeyDown);
-        window.removeEventListener('keyup', this._onKeyUp);
-        window.removeEventListener('keypress', this._onKeyPress);
+        base.removeEventListener(window, 'keydown', this._onKeyDown);
+        base.removeEventListener(window, 'keyup', this._onKeyUp);
+        base.removeEventListener(window, 'keypress', this._onKeyPress);
 
         this._onKeyDown = null;
         this._onKeyUp = null;
@@ -58212,12 +58214,12 @@ Phaser.Device.whenReady = function (callback, context, nonPrimer) {
         {
             // Ref. http://docs.phonegap.com/en/3.5.0/cordova_events_events.md.html#deviceready
             //  Cordova, but NOT Cocoon?
-            document.addEventListener('deviceready', readyCheck._monitor, false);
+            base.addEventListener(document, 'deviceready', readyCheck._monitor, false);
         }
         else
         {
-            document.addEventListener('DOMContentLoaded', readyCheck._monitor, false);
-            window.addEventListener('load', readyCheck._monitor, false);
+            base.addEventListener(document, 'DOMContentLoaded', readyCheck._monitor, false);
+            base.addEventListener(window, 'load', readyCheck._monitor, false);
         }
     }
 
@@ -58242,9 +58244,9 @@ Phaser.Device._readyCheck = function () {
     {
         this.deviceReadyAt = Date.now();
 
-        document.removeEventListener('deviceready', readyCheck._monitor);
-        document.removeEventListener('DOMContentLoaded', readyCheck._monitor);
-        window.removeEventListener('load', readyCheck._monitor);
+        base.removeEventListener(document, 'deviceready', readyCheck._monitor);
+        base.removeEventListener(document, 'DOMContentLoaded', readyCheck._monitor);
+        base.removeEventListener(window, 'load', readyCheck._monitor);
 
         this._initialize();
         this.initialized = true;
@@ -68175,7 +68177,7 @@ Phaser.Cache.prototype = {
         {
             sound.data.src = sound.url;
 
-            sound.data.addEventListener('canplaythrough', function () {
+            base.addEventListener(sound.data, 'canplaythrough', function () {
                 return _this.reloadSoundComplete(key);
             }, false);
 
@@ -71772,7 +71774,7 @@ Phaser.Loader.prototype = {
 
         var videoLoadEvent = function () {
 
-            file.data.removeEventListener(file.loadEvent, videoLoadEvent, false);
+            base.removeEventListener(file.data, file.loadEvent, videoLoadEvent, false);
             file.data.onerror = null;
             file.data.canplay = true;
             Phaser.GAMES[_this.game.id].load.fileComplete(file);
@@ -71780,13 +71782,13 @@ Phaser.Loader.prototype = {
         };
 
         file.data.onerror = function () {
-            file.data.removeEventListener(file.loadEvent, videoLoadEvent, false);
+            base.removeEventListener(file.data, file.loadEvent, videoLoadEvent, false);
             file.data.onerror = null;
             file.data.canplay = false;
             _this.fileError(file);
         };
 
-        file.data.addEventListener(file.loadEvent, videoLoadEvent, false);
+        base.addEventListener(file.data, file.loadEvent, videoLoadEvent, false);
 
         file.data.src = this.transformUrl(file.url, file);
         file.data.load();
@@ -71817,20 +71819,20 @@ Phaser.Loader.prototype = {
             file.data.name = file.key;
 
             var playThroughEvent = function () {
-                file.data.removeEventListener('canplaythrough', playThroughEvent, false);
+                base.removeEventListener(file.data, 'canplaythrough', playThroughEvent, false);
                 file.data.onerror = null;
                 // Why does this cycle through games?
                 Phaser.GAMES[_this.game.id].load.fileComplete(file);
             };
             file.data.onerror = function () {
-                file.data.removeEventListener('canplaythrough', playThroughEvent, false);
+                base.removeEventListener(file.data, 'canplaythrough', playThroughEvent, false);
                 file.data.onerror = null;
                 _this.fileError(file);
             };
 
             file.data.preload = 'auto';
             file.data.src = this.transformUrl(file.url, file);
-            file.data.addEventListener('canplaythrough', playThroughEvent, false);
+            base.addEventListener(file.data, 'canplaythrough', playThroughEvent, false);
             file.data.load();
         }
 
@@ -75549,8 +75551,8 @@ Phaser.ScaleManager.prototype = {
         };
 
         // This does not appear to be on the standards track
-        window.addEventListener('orientationchange', this._orientationChange, false);
-        window.addEventListener('resize', this._windowResize, false);
+        base.addEventListener(window, 'orientationchange', this._orientationChange, false);
+        base.addEventListener(window, 'resize', this._windowResize, false);
 
         if (this.compatibility.supportsFullScreen)
         {
@@ -75562,15 +75564,15 @@ Phaser.ScaleManager.prototype = {
                 return _this.fullScreenError(event);
             };
 
-            document.addEventListener('webkitfullscreenchange', this._fullScreenChange, false);
-            document.addEventListener('mozfullscreenchange', this._fullScreenChange, false);
-            document.addEventListener('MSFullscreenChange', this._fullScreenChange, false);
-            document.addEventListener('fullscreenchange', this._fullScreenChange, false);
+            base.addEventListener(document, 'webkitfullscreenchange', this._fullScreenChange, false);
+            base.addEventListener(document, 'mozfullscreenchange', this._fullScreenChange, false);
+            base.addEventListener(document, 'MSFullscreenChange', this._fullScreenChange, false);
+            base.addEventListener(document, 'fullscreenchange', this._fullScreenChange, false);
 
-            document.addEventListener('webkitfullscreenerror', this._fullScreenError, false);
-            document.addEventListener('mozfullscreenerror', this._fullScreenError, false);
-            document.addEventListener('MSFullscreenError', this._fullScreenError, false);
-            document.addEventListener('fullscreenerror', this._fullScreenError, false);
+            base.addEventListener(document, 'webkitfullscreenerror', this._fullScreenError, false);
+            base.addEventListener(document, 'mozfullscreenerror', this._fullScreenError, false);
+            base.addEventListener(document, 'MSFullscreenError', this._fullScreenError, false);
+            base.addEventListener(document, 'fullscreenerror', this._fullScreenError, false);
         }
 
         this.game.onResume.add(this._gameResumed, this);
@@ -76916,20 +76918,20 @@ Phaser.ScaleManager.prototype = {
 
         this.game.onResume.remove(this._gameResumed, this);
 
-        window.removeEventListener('orientationchange', this._orientationChange, false);
-        window.removeEventListener('resize', this._windowResize, false);
+        base.removeEventListener(window, 'orientationchange', this._orientationChange, false);
+        base.removeEventListener(window, 'resize', this._windowResize, false);
 
         if (this.compatibility.supportsFullScreen)
         {
-            document.removeEventListener('webkitfullscreenchange', this._fullScreenChange, false);
-            document.removeEventListener('mozfullscreenchange', this._fullScreenChange, false);
-            document.removeEventListener('MSFullscreenChange', this._fullScreenChange, false);
-            document.removeEventListener('fullscreenchange', this._fullScreenChange, false);
+            base.removeEventListener(document, 'webkitfullscreenchange', this._fullScreenChange, false);
+            base.removeEventListener(document, 'mozfullscreenchange', this._fullScreenChange, false);
+            base.removeEventListener(document, 'MSFullscreenChange', this._fullScreenChange, false);
+            base.removeEventListener(document, 'fullscreenchange', this._fullScreenChange, false);
 
-            document.removeEventListener('webkitfullscreenerror', this._fullScreenError, false);
-            document.removeEventListener('mozfullscreenerror', this._fullScreenError, false);
-            document.removeEventListener('MSFullscreenError', this._fullScreenError, false);
-            document.removeEventListener('fullscreenerror', this._fullScreenError, false);
+            base.removeEventListener(document, 'webkitfullscreenerror', this._fullScreenError, false);
+            base.removeEventListener(document, 'mozfullscreenerror', this._fullScreenError, false);
+            base.removeEventListener(document, 'MSFullscreenError', this._fullScreenError, false);
+            base.removeEventListener(document, 'fullscreenerror', this._fullScreenError, false);
         }
 
     }
@@ -96594,7 +96596,7 @@ Phaser.Video.prototype = {
         this.video = document.createElement("video");
         this.video.controls = false;
         this.video.setAttribute('autoplay', 'autoplay');
-        this.video.addEventListener('loadeddata', function (event) { _this.updateTexture(event); }, true);
+        base.addEventListener(this.video, 'loadeddata', function (event) { _this.updateTexture(event); }, true);
         this.video.src = window.URL.createObjectURL(blob);
         this.video.canplay = true;
 
@@ -96736,7 +96738,7 @@ Phaser.Video.prototype = {
 
         this._endCallback = this.complete.bind(this);
 
-        this.video.addEventListener('ended', this._endCallback, true);
+        base.addEventListener(this.video, 'ended', this._endCallback, true);
 
         if (loop)
         {
@@ -96767,7 +96769,7 @@ Phaser.Video.prototype = {
                 else
                 {
                     this._playCallback = this.playHandler.bind(this);
-                    this.video.addEventListener('playing', this._playCallback, true);
+                    base.addEventListener(this.video, 'playing', this._playCallback, true);
                 }
             }
 
@@ -96788,7 +96790,7 @@ Phaser.Video.prototype = {
      */
     playHandler: function () {
 
-        this.video.removeEventListener('playing', this._playCallback, true);
+        base.removeEventListener(this.video, 'playing', this._playCallback, true);
 
         this.updateTexture();
 
@@ -96847,8 +96849,8 @@ Phaser.Video.prototype = {
         }
         else
         {
-            this.video.removeEventListener('ended', this._endCallback, true);
-            this.video.removeEventListener('playing', this._playCallback, true);
+            base.removeEventListener(this.video, 'ended', this._endCallback, true);
+            base.removeEventListener(this.video, 'playing', this._playCallback, true);
 
             if (this.touchLocked)
             {
