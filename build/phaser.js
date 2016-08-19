@@ -7,7 +7,11 @@
 *
 * Phaser - http://phaser.io
 *
-* v2.6.1 "Caemlyn" - Built: Thu Aug 18 2016 23:35:02
+<<<<<<< HEAD
+* v2.4.6 "Baerlon" - Built: Tue Aug 09 2016 22:32:54
+=======
+* v2.6.1 "Caemlyn" - Built: Mon Jul 11 2016 09:59:51
+>>>>>>> upstream/master
 *
 * By Richard Davey http://www.photonstorm.com @photonstorm
 *
@@ -38232,8 +38236,12 @@ Phaser.Mouse.prototype = {
             base.removeEventListener(canvas, wheelEvent, this._onMouseWheel, true);
         }
 
+<<<<<<< HEAD
         base.removeEventListener(window, 'mouseup', this._onMouseUpGlobal, true);
-        base.removeEventListener(window, 'mouseout', this._onMouseOutGlobal, true);
+=======
+        window.removeEventListener('mouseup', this._onMouseUpGlobal, true);
+        window.removeEventListener('mouseout', this._onMouseOutGlobal, true);
+>>>>>>> upstream/master
 
         base.removeEventListener(document, 'pointerlockchange', this._pointerLockChange, true);
         base.removeEventListener(document, 'mozpointerlockchange', this._pointerLockChange, true);
@@ -101979,8 +101987,12 @@ Phaser.Video.prototype = {
 
         this._endCallback = this.complete.bind(this);
 
+<<<<<<< HEAD
         base.addEventListener(this.video, 'ended', this._endCallback, true);
-        base.addEventListener(this.video, 'webkitendfullscreen', this._endCallback, true);
+=======
+        this.video.addEventListener('ended', this._endCallback, true);
+        this.video.addEventListener('webkitendfullscreen', this._endCallback, true);
+>>>>>>> upstream/master
 
         if (loop)
         {
@@ -102101,9 +102113,14 @@ Phaser.Video.prototype = {
         }
         else
         {
+<<<<<<< HEAD
             base.removeEventListener(this.video, 'ended', this._endCallback, true);
-            base.removeEventListener(this.video, 'webkitendfullscreen', this._endCallback, true);
             base.removeEventListener(this.video, 'playing', this._playCallback, true);
+=======
+            this.video.removeEventListener('ended', this._endCallback, true);
+            this.video.removeEventListener('webkitendfullscreen', this._endCallback, true);
+            this.video.removeEventListener('playing', this._playCallback, true);
+>>>>>>> upstream/master
 
             if (this.touchLocked)
             {
