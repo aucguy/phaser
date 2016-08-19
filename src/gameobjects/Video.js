@@ -1,20 +1,20 @@
 /**
 * @author       Richard Davey <rich@photonstorm.com>
-* @copyright    2015 Photon Storm Ltd.
+* @copyright    2016 Photon Storm Ltd.
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 */
 
 /**
 * A Video object that takes a previously loaded Video from the Phaser Cache and handles playback of it.
-* 
+*
 * Alternatively it takes a getUserMedia feed from an active webcam and streams the contents of that to
 * the Video instead (see `startMediaStream` method)
-* 
+*
 * The video can then be applied to a Sprite as a texture. If multiple Sprites share the same Video texture and playback
 * changes (i.e. you pause the video, or seek to a new time) then this change will be seen across all Sprites simultaneously.
 *
 * Due to a bug in IE11 you cannot play a video texture to a Sprite in WebGL. For IE11 force Canvas mode.
-* 
+*
 * If you need each Sprite to be able to play a video fully independently then you will need one Video object per Sprite.
 * Please understand the obvious performance implications of doing this, and the memory required to hold videos in RAM.
 *
@@ -23,8 +23,11 @@
 * it's worth noting that every single Video needs to be touch unlocked, not just the first one. You can use the `changeSource`
 * method to try and work around this limitation, but see the method help for details.
 *
-* Small screen devices, especially iPod and iPhone will launch the video in its own native video player, 
+* Small screen devices, especially iPod and iPhone will launch the video in its own native video player,
 * outside of the Safari browser. There is no way to avoid this, it's a device imposed limitation.
+*
+* Note: On iOS if you need to detect when the user presses the 'Done' button (before the video ends)
+* then you need to add your own event listener
 *
 * @class Phaser.Video
 * @constructor
@@ -88,7 +91,7 @@ Phaser.Video = function (game, key, url) {
     this.onChangeSource = new Phaser.Signal();
 
     /**
-    * @property {Phaser.Signal} onComplete - This signal is dispatched when the Video completes playback, i.e. enters an 'ended' state. Videos set to loop will never dispatch this signal.
+    * @property {Phaser.Signal} onComplete - This signal is dispatched when the Video completes playback, i.e. enters an 'ended' state. On iOS specifically it also fires if the user hits the 'Done' button at any point during playback. Videos set to loop will never dispatch this signal.
     */
     this.onComplete = new Phaser.Signal();
 
@@ -249,7 +252,7 @@ Phaser.Video = function (game, key, url) {
     }
     else
     {
-        this.baseTexture = new PIXI.BaseTexture(PIXI.TextureCache['__default'].baseTexture.source);
+        this.baseTexture = new PIXI.BaseTexture(Phaser.Cache.DEFAULT.baseTexture.source);
         this.baseTexture.forceLoaded(this.width, this.height);
     }
 
@@ -278,7 +281,7 @@ Phaser.Video = function (game, key, url) {
     * A snapshot grabbed from the video. This is initially black. Populate it by calling Video.grab().
     * When called the BitmapData is updated with a grab taken from the current video playing or active video stream.
     * If Phaser has been compiled without BitmapData support this property will always be `null`.
-    * 
+    *
     * @property {Phaser.BitmapData} snapshot
     * @readOnly
     */
@@ -659,6 +662,7 @@ Phaser.Video.prototype = {
         this._endCallback = this.complete.bind(this);
 
         this.video.addEventListener('ended', this._endCallback, true);
+        this.video.addEventListener('webkitendfullscreen', this._endCallback, true);
 
         if (loop)
         {
@@ -718,11 +722,11 @@ Phaser.Video.prototype = {
 
     /**
      * Stops the video playing.
-     * 
+     *
      * This removes all locally set signals.
-     * 
+     *
      * If you only wish to pause playback of the video, to resume at a later time, use `Video.paused = true` instead.
-     * If the video hasn't finished downloading calling `Video.stop` will not abort the download. To do that you need to 
+     * If the video hasn't finished downloading calling `Video.stop` will not abort the download. To do that you need to
      * call `Video.destroy` instead.
      *
      * If you are using a video stream from a webcam then calling Stop will disconnect the MediaStream session and disable the webcam.
@@ -760,7 +764,17 @@ Phaser.Video.prototype = {
                 }
                 else
                 {
-                    this.videoStream.stop();
+                    if (this.videoStream.getTracks)
+                    {
+                        this.videoStream.getTracks().forEach(function (track) {
+                            track.stop();
+                        });
+                    }
+                    else
+                    {
+                        this.videoStream.stop();
+                    }
+
                 }
             }
 
@@ -770,6 +784,7 @@ Phaser.Video.prototype = {
         else
         {
             this.video.removeEventListener('ended', this._endCallback, true);
+            this.video.removeEventListener('webkitendfullscreen', this._endCallback, true);
             this.video.removeEventListener('playing', this._playCallback, true);
 
             if (this.touchLocked)
@@ -940,7 +955,7 @@ Phaser.Video.prototype = {
      * On some mobile browsers you cannot play a video until the user has explicitly touched the video to allow it.
      * Phaser handles this via the `setTouchLock` method. However if you have 3 different videos, maybe an "Intro", "Start" and "Game Over"
      * split into three different Video objects, then you will need the user to touch-unlock every single one of them.
-     * 
+     *
      * You can avoid this by using just one Video object and simply changing the video source. Once a Video element is unlocked it remains
      * unlocked, even if the source changes. So you can use this to your benefit to avoid forcing the user to 'touch' the video yet again.
      *
@@ -987,7 +1002,7 @@ Phaser.Video.prototype = {
 
     /**
     * Internal callback that monitors the download progress of a video after changing its source.
-    * 
+    *
     * @method Phaser.Video#checkVideoProgress
     * @private
     */
@@ -1018,7 +1033,7 @@ Phaser.Video.prototype = {
     /**
     * Sets the Input Manager touch callback to be Video.unlock.
     * Required for mobile video unlocking. Mostly just used internally.
-    * 
+    *
     * @method Phaser.Video#setTouchLock
     */
     setTouchLock: function () {
@@ -1032,7 +1047,7 @@ Phaser.Video.prototype = {
     * Enables the video on mobile devices, usually after the first touch.
     * If the SoundManager hasn't been unlocked then this will automatically unlock that as well.
     * Only one video can be pending unlock at any one time.
-    * 
+    *
     * @method Phaser.Video#unlock
     */
     unlock: function () {
@@ -1096,7 +1111,7 @@ Phaser.Video.prototype = {
     /**
      * Removes the Video element from the DOM by calling parentNode.removeChild on itself.
      * Also removes the autoplay and src attributes and nulls the reference.
-     * 
+     *
      * @method Phaser.Video#removeVideoElement
      */
     removeVideoElement: function () {
@@ -1242,7 +1257,7 @@ Object.defineProperty(Phaser.Video.prototype, "mute", {
 /**
 * Gets or sets the paused state of the Video.
 * If the video is still touch locked (such as on iOS devices) this call has no effect.
-* 
+*
 * @name Phaser.Video#paused
 * @property {boolean} paused
 */
@@ -1346,7 +1361,7 @@ Object.defineProperty(Phaser.Video.prototype, "playbackRate", {
 * Gets or sets if the Video is set to loop.
 * Please note that at present some browsers (i.e. Chrome) do not support *seamless* video looping.
 * If the video isn't yet set this will always return false.
-* 
+*
 * @name Phaser.Video#loop
 * @property {boolean} loop
 */

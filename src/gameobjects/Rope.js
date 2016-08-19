@@ -1,6 +1,6 @@
 /**
 * @author       Richard Davey <rich@photonstorm.com>
-* @copyright    2015 Photon Storm Ltd, Richard Davey
+* @copyright    2016 Photon Storm Ltd, Richard Davey
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 */
 
@@ -56,7 +56,7 @@ Phaser.Rope = function (game, x, y, key, frame, points) {
     */
     this.type = Phaser.ROPE;
 
-    PIXI.Rope.call(this, PIXI.TextureCache['__default'], this.points);
+    PIXI.Rope.call(this, Phaser.Cache.DEFAULT, this.points);
 
     Phaser.Component.Core.init.call(this, game, x, y, key, frame);
 

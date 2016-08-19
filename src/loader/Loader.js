@@ -1,7 +1,7 @@
 /* jshint wsh:true */
 /**
 * @author       Richard Davey <rich@photonstorm.com>
-* @copyright    2015 Photon Storm Ltd.
+* @copyright    2016 Photon Storm Ltd.
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 */
 
@@ -103,7 +103,19 @@ Phaser.Loader = function (game) {
     this.path = '';
 
     /**
-    * This event is dispatched when the loading process starts: before the first file has been requested,
+    * Used to map the application mime-types to to the Accept header in XHR requests.
+    * If you don't require these mappings, or they cause problems on your server, then
+    * remove them from the headers object and the XHR request will not try to use them.
+    * @property {object} headers
+    * @default
+    */
+    this.headers = {
+        json: "application/json",
+        xml: "application/xml"
+    };
+
+    /**
+     * This event is dispatched when the loading process starts: before the first file has been requested,
     * but after all the initial packs have been loaded.
     *
     * @property {Phaser.Signal} onLoadStart
@@ -2115,7 +2127,7 @@ Phaser.Loader.prototype = {
                 {
                     if (file.asBlob)
                     {
-                        this.xhrLoad(file, this.transformUrl(file.url, file), 'arraybuffer', this.fileComplete);
+                        this.xhrLoad(file, this.transformUrl(file.url, file), 'blob', this.fileComplete);
                     }
                     else
                     {
@@ -2276,9 +2288,9 @@ Phaser.Loader.prototype = {
             var playThroughEvent = function () {
                 file.data.removeEventListener('canplaythrough', playThroughEvent, false);
                 file.data.onerror = null;
-                // Why does this cycle through games?
-                Phaser.GAMES[_this.game.id].load.fileComplete(file);
+                _this.fileComplete(file);
             };
+
             file.data.onerror = function () {
                 file.data.removeEventListener('canplaythrough', playThroughEvent, false);
                 file.data.onerror = null;
@@ -2317,6 +2329,11 @@ Phaser.Loader.prototype = {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
         xhr.responseType = type;
+
+        if (this.headers[file.type])
+        {
+            xhr.setRequestHeader("Accept", this.headers[file.type]);
+        }
 
         onerror = onerror || this.fileError;
 
@@ -2702,7 +2719,7 @@ Phaser.Loader.prototype = {
                 {
                     try
                     {
-                        file.data = new Blob([new Uint8Array(xhr.response)]);
+                        file.data = xhr.response;
                     }
                     catch (e)
                     {

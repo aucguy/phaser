@@ -1,6 +1,6 @@
 /**
 * @author       Richard Davey <rich@photonstorm.com>
-* @copyright    2015 Photon Storm Ltd.
+* @copyright    2016 Photon Storm Ltd.
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 */
 
@@ -34,6 +34,7 @@
 * @param {number} [style.strokeThickness=0] - A number that represents the thickness of the stroke. Default is 0 (no stroke).
 * @param {boolean} [style.wordWrap=false] - Indicates if word wrap should be used.
 * @param {number} [style.wordWrapWidth=100] - The width in pixels at which text will wrap.
+* @param {number} [style.maxLines=0] - The maximum number of lines to be shown for wrapped text.
 * @param {number} [style.tabs=0] - The size (in pixels) of the tabs, for when text includes tab characters. 0 disables. Can be an array of varying tab sizes, one per tab stop.
 */
 Phaser.Text = function (game, x, y, text, style) {
@@ -284,10 +285,14 @@ Phaser.Text.prototype.setShadow = function (x, y, color, blur, shadowStroke, sha
 * @param {number} [style.strokeThickness=0] - A number that represents the thickness of the stroke. Default is 0 (no stroke).
 * @param {boolean} [style.wordWrap=false] - Indicates if word wrap should be used.
 * @param {number} [style.wordWrapWidth=100] - The width in pixels at which text will wrap.
+* @param {number} [style.maxLines=0] - The maximum number of lines to be shown for wrapped text.
 * @param {number|array} [style.tabs=0] - The size (in pixels) of the tabs, for when text includes tab characters. 0 disables. Can be an array of varying tab sizes, one per tab stop.
+* @param {boolean} [update=false] - Immediately update the Text object after setting the new style? Or wait for the next frame.
 * @return {Phaser.Text} This Text instance.
 */
-Phaser.Text.prototype.setStyle = function (style) {
+Phaser.Text.prototype.setStyle = function (style, update) {
+
+    if (update === undefined) { update = false; }
 
     style = style || {};
     style.font = style.font || 'bold 20pt Arial';
@@ -300,6 +305,7 @@ Phaser.Text.prototype.setStyle = function (style) {
     style.strokeThickness = style.strokeThickness || 0;
     style.wordWrap = style.wordWrap || false;
     style.wordWrapWidth = style.wordWrapWidth || 100;
+    style.maxLines = style.maxLines || 0;
     style.shadowOffsetX = style.shadowOffsetX || 0;
     style.shadowOffsetY = style.shadowOffsetY || 0;
     style.shadowColor = style.shadowColor || 'rgba(0,0,0,0)';
@@ -336,8 +342,14 @@ Phaser.Text.prototype.setStyle = function (style) {
     this._fontComponents = components;
 
     style.font = this.componentsToFont(this._fontComponents);
+
     this.style = style;
     this.dirty = true;
+
+    if (update)
+    {
+        this.updateText();
+    }
 
     return this;
 
@@ -371,12 +383,30 @@ Phaser.Text.prototype.updateText = function () {
     var maxLineWidth = 0;
     var fontProperties = this.determineFontProperties(this.style.font);
 
-    for (var i = 0; i < lines.length; i++)
+    var drawnLines = lines.length;
+    
+    if (this.style.maxLines > 0 && this.style.maxLines < lines.length)
+    {
+        drawnLines = this.style.maxLines;
+    }
+
+    this._charCount = 0;
+
+    for (var i = 0; i < drawnLines; i++)
     {
         if (tabs === 0)
         {
             //  Simple layout (no tabs)
-            var lineWidth = this.context.measureText(lines[i]).width + this.style.strokeThickness + this.padding.x;
+            var lineWidth =  this.style.strokeThickness + this.padding.x;
+
+            if (this.colors.length > 0 || this.strokeColors.length > 0 || this.fontWeights.length > 0 || this.fontStyles.length > 0)
+            {
+                lineWidth += this.measureLine(lines[i]);
+            }
+            else
+            {
+                lineWidth += this.context.measureText(lines[i]).width;
+            }
 
             // Adjust for wrapped text
             if (this.style.wordWrap)
@@ -396,7 +426,16 @@ Phaser.Text.prototype.updateText = function () {
 
                 for (var c = 0; c < line.length; c++)
                 {
-                    var section = Math.ceil(this.context.measureText(line[c]).width);
+                    var section = 0;
+
+                    if (this.colors.length > 0 || this.strokeColors.length > 0 || this.fontWeights.length > 0 || this.fontStyles.length > 0)
+                    {
+                        section = this.measureLine(line[c]);
+                    }
+                    else
+                    {
+                        section = Math.ceil(this.context.measureText(line[c]).width);
+                    }
 
                     if (c > 0)
                     {
@@ -411,7 +450,14 @@ Phaser.Text.prototype.updateText = function () {
                 for (var c = 0; c < line.length; c++)
                 {
                     //  How far to the next tab?
-                    lineWidth += Math.ceil(this.context.measureText(line[c]).width);
+                    if (this.colors.length > 0 || this.strokeColors.length > 0 || this.fontWeights.length > 0 || this.fontStyles.length > 0)
+                    {
+                        lineWidth += this.measureLine(line[c]);
+                    }
+                    else
+                    {
+                        lineWidth += Math.ceil(this.context.measureText(line[c]).width);
+                    }
 
                     var diff = this.game.math.snapToCeil(lineWidth, tabs) - lineWidth;
 
@@ -428,7 +474,7 @@ Phaser.Text.prototype.updateText = function () {
     
     //  Calculate text height
     var lineHeight = fontProperties.fontSize + this.style.strokeThickness + this.padding.y;
-    var height = lineHeight * lines.length;
+    var height = lineHeight * drawnLines;
     var lineSpacing = this._lineSpacing;
 
     if (lineSpacing < 0 && Math.abs(lineSpacing) > lineHeight)
@@ -439,7 +485,7 @@ Phaser.Text.prototype.updateText = function () {
     //  Adjust for line spacing
     if (lineSpacing !== 0)
     {
-        height += lineSpacing * lines.length;
+        height += (lineSpacing > 0) ? lineSpacing * lines.length : lineSpacing * (lines.length - 1);
     }
 
     this.canvas.height = height * this._res;
@@ -472,7 +518,7 @@ Phaser.Text.prototype.updateText = function () {
     this._charCount = 0;
 
     //  Draw text line by line
-    for (i = 0; i < lines.length; i++)
+    for (i = 0; i < drawnLines; i++)
     {
         //  Split the line by
 
@@ -627,6 +673,67 @@ Phaser.Text.prototype.updateShadow = function (state) {
         this.context.shadowBlur = 0;
     }
 
+};
+
+/**
+* Measures a line of text character by character taking into the account the specified character styles.
+*
+* @method Phaser.Text#measureLine
+* @private
+* @param {string} line - The line of text to measure.
+* @return {integer} length of the line.
+*/
+Phaser.Text.prototype.measureLine = function (line) {
+
+    var lineLength = 0;
+
+    for (var i = 0; i < line.length; i++)
+    {
+        var letter = line[i];
+
+        if (this.fontWeights.length > 0 || this.fontStyles.length > 0)
+        {
+            var components = this.fontToComponents(this.context.font);
+
+            if (this.fontStyles[this._charCount])
+            {
+                components.fontStyle = this.fontStyles[this._charCount];
+            }
+
+            if (this.fontWeights[this._charCount])
+            {
+                components.fontWeight = this.fontWeights[this._charCount];
+            }
+
+            this.context.font = this.componentsToFont(components);
+        }
+
+        if (this.style.stroke && this.style.strokeThickness)
+        {
+            if (this.strokeColors[this._charCount])
+            {
+                this.context.strokeStyle = this.strokeColors[this._charCount];
+            }
+
+            this.updateShadow(this.style.shadowStroke);
+        }
+
+        if (this.style.fill)
+        {
+            if (this.colors[this._charCount])
+            {
+                this.context.fillStyle = this.colors[this._charCount];
+            }
+
+            this.updateShadow(this.style.shadowFill);
+        }
+
+        lineLength += this.context.measureText(letter).width;
+
+        this._charCount++;
+    }
+
+    return Math.ceil(lineLength);
 };
 
 /**
@@ -1077,18 +1184,27 @@ Phaser.Text.prototype.fontToComponents = function (font) {
 
     if (m)
     {
+        var family = m[5].trim();
+
+        // If it looks like the value should be quoted, but isn't, then quote it.
+        if (!/^(?:inherit|serif|sans-serif|cursive|fantasy|monospace)$/.exec(family) && !/['",]/.exec(family))
+        {
+            family = "'" + family + "'";
+        }
+
         return {
             font: font,
             fontStyle: m[1] || 'normal',
             fontVariant: m[2] || 'normal',
             fontWeight: m[3] || 'normal',
             fontSize: m[4] || 'medium',
-            fontFamily: m[5]
+            fontFamily: family
         };
     }
     else
     {
         console.warn("Phaser.Text - unparsable CSS font: " + font);
+
         return {
             font: font
         };
@@ -1134,18 +1250,34 @@ Phaser.Text.prototype.componentsToFont = function (components) {
 };
 
 /**
- * The text to be displayed by this Text object.
- * Use a \n to insert a carriage return and split the text.
- * The text will be rendered with any style currently set.
- *
- * @method Phaser.Text#setText
- * @param {string} [text] - The text to be displayed. Set to an empty string to clear text that is already present.
- * @return {Phaser.Text} This Text instance.
- */
-Phaser.Text.prototype.setText = function (text) {
+* The text to be displayed by this Text object.
+* Use a \n to insert a carriage return and split the text.
+* The text will be rendered with any style currently set.
+*
+* Use the optional `immediate` argument if you need the Text display to update immediately.
+* 
+* If not it will re-create the texture of this Text object during the next time the render
+* loop is called.
+*
+* @method Phaser.Text#setText
+* @param {string} [text] - The text to be displayed. Set to an empty string to clear text that is already present.
+* @param {boolean} [immediate=false] - Update the texture used by this Text object immediately (true) or automatically during the next render loop (false).
+* @return {Phaser.Text} This Text instance.
+*/
+Phaser.Text.prototype.setText = function (text, immediate) {
+
+    if (immediate === undefined) { immediate = false; }
 
     this.text = text.toString() || '';
-    this.dirty = true;
+
+    if (immediate)
+    {
+        this.updateText();
+    }
+    else
+    {
+        this.dirty = true;
+    }
 
     return this;
 
@@ -2156,5 +2288,5 @@ Object.defineProperty(Phaser.Text.prototype, 'height', {
 
 Phaser.Text.fontPropertiesCache = {};
 
-Phaser.Text.fontPropertiesCanvas = PIXI.CanvasPool.create(Phaser.Text.fontPropertiesCanvas);
+Phaser.Text.fontPropertiesCanvas = document.createElement('canvas');
 Phaser.Text.fontPropertiesContext = Phaser.Text.fontPropertiesCanvas.getContext('2d');

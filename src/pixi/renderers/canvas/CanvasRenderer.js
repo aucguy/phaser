@@ -107,10 +107,6 @@ PIXI.CanvasRenderer = function (game) {
      */
     this.refresh = true;
 
-    //  This is already done in the Game.setUpRenderer method.
-    // this.view.width = this.width * this.resolution;
-    // this.view.height = this.height * this.resolution;
-
     /**
      * Internal var.
      *
@@ -161,13 +157,14 @@ PIXI.CanvasRenderer.prototype.constructor = PIXI.CanvasRenderer;
  */
 PIXI.CanvasRenderer.prototype.render = function (stage) {
 
-    stage.updateTransform();
-
     this.context.setTransform(1, 0, 0, 1, 0, 0);
 
     this.context.globalAlpha = 1;
 
     this.renderSession.currentBlendMode = 0;
+    this.renderSession.shakeX = this.game.camera._shake.x;
+    this.renderSession.shakeY = this.game.camera._shake.y;
+
     this.context.globalCompositeOperation = 'source-over';
 
     if (navigator.isCocoonJS && this.view.screencanvas)
@@ -199,8 +196,8 @@ PIXI.CanvasRenderer.prototype.render = function (stage) {
  * @method destroy
  * @param [removeView=true] {boolean} Removes the Canvas element from the DOM.
  */
-PIXI.CanvasRenderer.prototype.destroy = function(removeView)
-{
+PIXI.CanvasRenderer.prototype.destroy = function (removeView) {
+
     if (removeView === undefined) { removeView = true; }
 
     if (removeView && this.view.parent)
@@ -222,8 +219,8 @@ PIXI.CanvasRenderer.prototype.destroy = function(removeView)
  * @param width {Number} the new width of the canvas view
  * @param height {Number} the new height of the canvas view
  */
-PIXI.CanvasRenderer.prototype.resize = function(width, height)
-{
+PIXI.CanvasRenderer.prototype.resize = function (width, height) {
+
     this.width = width * this.resolution;
     this.height = height * this.resolution;
 
@@ -235,6 +232,12 @@ PIXI.CanvasRenderer.prototype.resize = function(width, height)
         this.view.style.width = this.width / this.resolution + "px";
         this.view.style.height = this.height / this.resolution + "px";
     }
+
+    if (this.renderSession.smoothProperty)
+    {
+        this.context[this.renderSession.smoothProperty] = (this.renderSession.scaleMode === PIXI.scaleModes.LINEAR);
+    }
+
 };
 
 /**

@@ -84,7 +84,6 @@
     <script src="$path/src/pixi/primitives/Graphics.js"></script>
     <script src="$path/src/pixi/primitives/GraphicsData.js"></script>
 
-
 EOL;
 
     if ($modules['rope'])
@@ -201,6 +200,8 @@ EOL;
     <script src="$path/src/gameobjects/SpriteBatch.js"></script>
     <script src="$path/src/gameobjects/Particle.js"></script>
 
+    <script src="$path/src/plugins/weapon/WeaponPlugin.js"></script>
+    <script src="$path/src/plugins/weapon/Bullet.js"></script>
 
 EOL;
 

@@ -6,7 +6,7 @@ module.exports = {
         options: {
             sourceMap: '<%= sourcemap %>',
             sourceMapName: '<%= compile_dir %>/<%= filename %>.map',
-            banner: '/* Phaser v<%= package.version %> - http://phaser.io - @photonstorm - (c) 2015 Photon Storm Ltd. */\n'
+            banner: '/* Phaser v<%= package.version %> - http://phaser.io - @photonstorm - (c) 2016 Photon Storm Ltd. */\n'
         },
 
         src: '<%= compile_dir %>/<%= filename %>.js',
@@ -18,7 +18,7 @@ module.exports = {
         options: {
             sourceMap: '<%= sourcemap %>',
             sourceMapName: '<%= compile_dir %>/pixi.map',
-            banner: '/* Phaser v<%= package.version %> PIXI Build - http://phaser.io - @photonstorm - (c) 2015 Photon Storm Ltd. */\n'
+            banner: '/* Phaser v<%= package.version %> PIXI Build - http://phaser.io - @photonstorm - (c) 2016 Photon Storm Ltd. */\n'
         },
 
         src: ['<%= concat.pixi.dest %>'],
@@ -31,7 +31,7 @@ module.exports = {
         options: {
             sourceMap: '<%= sourcemap %>',
             sourceMapName: '<%= compile_dir %>/creature.map',
-            banner: '/* Phaser v<%= package.version %> Creature Build - http://phaser.io - @photonstorm - (c) 2015 Photon Storm Ltd. */\n'
+            banner: '/* Phaser v<%= package.version %> Creature Build - http://phaser.io - @photonstorm - (c) 2016 Photon Storm Ltd. */\n'
         },
 
         src: ['<%= concat.creatureGlobalSplit.dest %>'],
@@ -44,7 +44,7 @@ module.exports = {
         options: {
             sourceMap: '<%= sourcemap %>',
             sourceMapName: '<%= compile_dir %>/p2.map',
-            banner: '/* Phaser v<%= package.version %> P2.JS Build - http://phaser.io - @photonstorm - (c) 2015 Photon Storm Ltd. */\n'
+            banner: '/* Phaser v<%= package.version %> P2.JS Build - http://phaser.io - @photonstorm - (c) 2016 Photon Storm Ltd. */\n'
         },
 
         src: ['<%= concat.p2GlobalSplit.dest %>'],
