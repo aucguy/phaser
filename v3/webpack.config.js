@@ -1,6 +1,7 @@
 'use strict';
 
 const webpack = require('webpack');
+const WebpackShellPlugin = require('webpack-shell-plugin');
 
 module.exports = {
 
@@ -14,11 +15,22 @@ module.exports = {
         path: './dist',
         filename: '[name].js',
         library: 'Phaser',
-        publicPath: '/lib'
+        libraryTarget: 'umd',
+        sourceMapFilename: '[file].map',
+        devtoolModuleFilenameTemplate: "webpack:///[resource-path]", // string
+        devtoolFallbackModuleFilenameTemplate: "webpack:///[resource-path]?[hash]", // string
+        umdNamedDefine: true,
     },
 
-    devServer: {
-        contentBase: '/src'
-    }
+    plugins: [
+
+        new WebpackShellPlugin({
+            onBuildStart: 'node create-checksum.js',
+            onBuildEnd: 'node copy-to-examples.js'
+        })
+
+    ],
+
+    devtool: 'inline-source-map'
 
 };

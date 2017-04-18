@@ -10,6 +10,7 @@
   "license": "MIT",
   "licenseUrl": "http://www.opensource.org/licenses/mit-license.php",
   "main": "./build/phaser.js",
+  "typings": "./typings/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://photonstorm@github.com/photonstorm/phaser.git"
@@ -30,9 +31,16 @@
     "web audio"
   ],
   "dependencies": {
+    "json-loader": "^0.5.4",
     "webpack": "2.1.0-beta.27"
   },
   "devDependencies": {
-    "webpack-dev-server": "2.1.0-beta.11"
+    "copy-webpack-plugin": "^4.0.1",
+    "fs-extra": "^1.0.0",
+    "json-loader": "^0.5.4",
+    "node-uuid": "^1.4.7",
+    "webpack": "2.1.0-beta.27",
+    "webpack-dev-server": "2.1.0-beta.11",
+    "webpack-shell-plugin": "^0.4.3"
   }
 }
